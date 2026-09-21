@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Escolar - Motor 3D Premium</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: radial-gradient(circle at 50% 50%, #2a2a35 0%, #0d0d12 100%);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+        }
+        canvas { display: block; }
+        
+        #painel-info {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            background: rgba(15, 23, 42, 0.45); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px); 
+            
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05); 
+            
+            padding: 30px 35px;
+            border-radius: 24px;
+            display: none;
+            pointer-events: none;
+            
+            width: max-content; 
+            max-width: 380px; 
+            overflow-wrap: break-word; 
+            word-wrap: break-word; 
+            word-break: break-word; 
+
+            animation: surgir 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #titulo-peca {
+            margin: 0 0 15px 0;
+            color: #38bdf8; 
+            font-size: 26px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.3); 
+        }
+
+        #desc-peca {
+            margin: 0;
+            color: #f1f5f9; 
+            line-height: 1.7;
+            font-size: 18px;
+            font-weight: 300;
+        }
+
+        @keyframes surgir {
+            from { opacity: 0; transform: translateY(-20px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="painel-info">
+        <h2 id="titulo-peca">Nome da Peça</h2>
+        <p id="desc-peca">Descrição mecânica do componente.</p>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 3, 7); 
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; 
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = false; 
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
+        hemiLight.position.set(0, 20, 0);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // 4. Carregamento do Motor
+        const loader = new GLTFLoader();
+        let motor;
+        
+        loader.load('V6Motor.glb', (gltf) => {
+            motor = gltf.scene;
+            scene.add(motor);
+        });
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        const painelInfo = document.getElementById('painel-info');
+        const tituloPeca = document.getElementById('titulo-peca');
+        const descPeca = document.getElementById('desc-peca');
+
+        window.addEventListener('click', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            if (motor) {
+                const intersecoes = raycaster.intersectObject(motor, true);
+
+                if (intersecoes.length > 0) {
+                    const pecaTocada = intersecoes[0].object;
+                    const nome = pecaTocada.name.toLowerCase();
+                    
+                    painelInfo.style.display = 'block';
+                    
+                    if (nome.includes("plane018_collector_0")){
+                        tituloPeca.innerText = "Coletor de Escape (Exhaust Manifold)";
+                        descPeca.innerText = "Recolhe os gases residuais em alta pressão e temperatura imediatamente após a combustão, canalizando-os de forma eficiente dos cilindros para o sistema de exaustão ou turbocompressor..";
+                    
+                    } else if (nome.includes("cylinder010_collector_0")) {
+                        ttituloPeca.innerText = "Coletor de Escape (Exhaust Manifold)";
+                        descPeca.innerText = "Recolhe os gases residuais em alta pressão e temperatura imediatamente após a combustão, canalizando-os de forma eficiente dos cilindros para o sistema de exaustão ou turbocompressor..";
+                    
+                    } else if (nome.includes("plug_low")) {
+                        tituloPeca.innerText = "Vela de Ignição (Isolador Cerâmico)";
+                        descPeca.innerText = "Isola a alta tensão elétrica necessária para gerar o arco voltaico (faísca), servindo como o gatilho da detonação da mistura comprimida.";
+
+                    } else if (nome.includes("cylinder014") || nome.includes("cylinder007")){
+                        tituloPeca.innerText = "Conjunto de Válvula e Mola";
+                        descPeca.innerText = "Controla o fluxo. Abre para permitir a entrada de ar/combustível ou a saída de gases. A mola exerce força elástica para garantir o fechamento hermético da câmara de combustão em frações de segundo.";
+                    
+                    } else if (nome.includes("cylinder013") || nome.includes("cylinder006")) {
+                        tituloPeca.innerText = "Eixo de Comando de Válvulas (Camshaft)";
+                        descPeca.innerText = "Eixo rotativo contendo ressaltos (cames) com geometria matematicamente calculada. Ele empurra as válvulas, ditando o tempo e a duração exata da abertura delas durante o ciclo mecânico.";
+                    
+                    } else if (nome.includes("gearbox")) {
+                        tituloPeca.innerText = "Caixa de Câmbio (Transmissão)";
+                        descPeca.innerText = "Utiliza relações matemáticas através de conjuntos de engrenagens para multiplicar o torque (força) ou a velocidade de rotação gerada pelo motor, adaptando a energia cinética antes de enviá-la às rodas.";
+                    
+                    } else if (nome.includes("plane014") || nome.includes("pan") || nome.includes("sump")) {
+                        tituloPeca.innerText = "Cárter de Óleo";
+                        descPeca.innerText = "Reservatório inferior responsável por armazenar o fluido lubrificante. A lubrificação reduz drasticamente o coeficiente de atrito mecânico entre as peças móveis e ajuda na dissipação da energia térmica (calor).";
+                    
+                    } else if (nome.includes("plane012") || nome.includes("plane015")) {
+                        tituloPeca.innerText = "Cabeça do Motor";
+                        descPeca.innerText = "Atua como o teto da câmara de combustão. É projetada para suportar e direcionar os picos extremos de pressão e energia térmica gerados durante a detonação da mistura ar/combustível.";
+                    
+                    } else if (nome.includes("plane016") || nome.includes("plane013")) {
+                        tituloPeca.innerText = "Junta da Cabeça (Head Gasket)";
+                        descPeca.innerText = "Elemento crucial de vedação física. Resiste a altíssimas tensões mecânicas e térmicas para selar a câmara de combustão, impedindo que os gases pressurizados, o óleo e o líquido de refrigeração se misturem.";
+                        
+                    } else if (nome.includes("cylinder029")) {
+                        tituloPeca.innerText = "Árvore de Cames (Eixo de Distribuição)";
+                        descPeca.innerText = "Converte energia cinética rotacional em movimento linear. A sua geometria excêntrica dita o tempo exato e a amplitude de abertura das válvulas, sincronizando a respiração do motor mecânico.";
+
+                    } else if (nome.includes("hute_pulley")){
+                        tituloPeca.innerText = "Ventoinha de Arrefecimento";
+                        descPeca.innerText = "Gera um fluxo de ar forçado. É um elemento crucial para a termodinâmica do sistema, facilitando a troca de calor por convecção e garantindo que o motor opere na sua temperatura ideal.";
+                    
+                    } else if (nome.includes("plane020")) {
+                        tituloPeca.innerText = "Correia de Transmissão";
+                        descPeca.innerText = "Sistema de transmissão por polias. Utiliza o atrito mecânico e a tensão para transferir a energia cinética rotacional do eixo principal para os componentes auxiliares do motor.";
+                        
+                    } else if (nome.includes("NOME_DO_ALTERNADOR_AQUI")) {
+                        tituloPeca.innerText = "Alternador / Componentes Auxiliares";
+                        descPeca.innerText = "Gerador elétrico acionado mecanicamente. Baseado nos princípios do eletromagnetismo, converte a energia mecânica de rotação em energia elétrica para alimentar o sistema de ignição.";
+                    
+                    } else if (nome.includes("cube020") || nome.includes("cube003")) {
+                        tituloPeca.innerText = "Chapa de Fixação Dos Componentes Da Correia";
+                        descPeca.innerText = "Suporte estrutural. Mantém a geometria e o alinhamento corretos dos componentes auxiliares do motor, garantindo que a correia de transmissão funcione de forma eficiente e sem falhas.";
+                    
+                    } else if (nome.includes("ziercurve")) {
+                        tituloPeca.innerText = "Tubos de Arrefecimento";
+                        descPeca.innerText = "Condutas de dinâmica de fluidos. Transportam o líquido de refrigeração sob alta pressão e temperatura, permitindo a troca térmica por convecção no radiador.";
+
+                    } else if (nome.includes("cylinder031") || nome.includes("cylinder030") || nome.includes("plane019") || nome.includes("cylinder032")) {
+                        tituloPeca.innerText = "Acessórios Acionados (Bombas e Compressores)";
+                        descPeca.innerText = "Polias movidas pela correia periférica. Convertem o binário excedente do motor em trabalho físico auxiliar, como pressão hidráulica ou geração eletromagnética.";
+
+                    } else if (nome.includes("cube015") || nome.includes("cube007")) {
+                        tituloPeca.innerText = "Coletor de Admissão";
+                        descPeca.innerText = "Sistema de condutas concebido para equalizar o volume e a velocidade do fluxo de ar, distribuindo-o de forma equitativa para as câmaras de combustão.";
+                    
+                    } else if (nome.includes("bielle_sup")) {
+                        tituloPeca.innerText = "Biela (Connecting Rod)";
+                        descPeca.innerText = "Haste metálica que atua como elo de transferência cinética. Liga o pistão à cambota, convertendo o impacto linear da explosão em força de alavanca rotacional.";
+                        
+                    } else if (nome.includes("piston")) {
+                        tituloPeca.innerText = "Pistão";
+                        descPeca.innerText = "Êmbolo cilíndrico que comprime a mistura gasosa. É a primeira peça a absorver a energia térmica e de pressão gerada pela combustão, dando início ao ciclo mecânico.";
+                        
+                    } else if (nome.includes("cube016") || nome.includes("cube012") || nome.includes("cube009") || nome.includes("cube002") || nome.includes("cube017")) {
+                        tituloPeca.innerText = "Carburador / Corpo de Borboleta";
+                        descPeca.innerText = "Responsável pela estequiometria (mistura ideal de ar e combustível). Através do Efeito Venturi, pulveriza o combustível no fluxo de ar que é sugado pelo vácuo dos cilindros.";
+                    
+                    } else if (nome.includes("cylinder022") || nome.includes("cylinder039") || nome.includes("cylinder017") || nome.includes("cylinder024") || nome.includes("cylinder038")){
+                        tituloPeca.innerText = "Filtro de Ar (Air Cleaner)";
+                        descPeca.innerText = "Sistema de filtragem mecânica. Retém partículas suspensas, garantindo que apenas fluido (ar) limpo entre nos carburadores. É vital para prevenir o desgasteabrasivo e manter a vedação e compressão matemática dos cilindros.";
+
+                    } else if (nome.includes("cylinder012")) {
+                        tituloPeca.innerText = "Virabrequim (Cambota / Eixo de Manivelas)";
+                        descPeca.innerText = "O coração mecânico da transformação vetorial. Converte o movimento linear alternativo dos pistões em momento angular (força rotacional) constante, aplicando os princípios físicos de alavanca e inércia.";
+                    
+                    } else if (nome.includes("cylinder033")) {
+                        tituloPeca.innerText = "Articulação de Aceleração (Linkage)";
+                        descPeca.innerText = "Sistema de varões articulados. Garante a sincronização mecânica exata da abertura das válvulas borboleta dos três carburadores simultaneamente, equalizando a dinâmica de fluidos na admissão.";
+                        
+                    } else if (nome.includes("cube014") || nome.includes("cube011")) {
+                        tituloPeca.innerText = "Torres do Coletor de Admissão";
+                        descPeca.innerText = "Dutos de transição com volume calculado. Direcionam a mistura ar/combustível diretamente para as válvulas, otimizando a velocidade do fluxo e minimizando a perda de carga aerodinâmica.";
+
+                    } else if (nome.includes("cylinder036")) {
+                        tituloPeca.innerText = "Cornetas de Admissão (Velocity Stacks)";
+                        descPeca.innerText = "Dutos com geometria parabólica otimizada. Utilizam o Princípio de Bernoulli para acelerar o fluxo de ar e reduzir a turbulência aerodinâmica, maximizando a eficiência volumétrica em altas rotações.";
+
+                    } else if (nome.includes("cylinder008") || nome.includes("cylinder015") || nome.includes("cylinder005") || nome.includes("cylinder021")) {
+                        tituloPeca.innerText = "Cabos de Ignição (Alta Tensão)";
+                        descPeca.innerText = "Condutores com alto isolamento dielétrico. Transportam a alta tensão até às velas, minimizando a resistência ôhmica para gerar o arco voltaico que inicia a combustão.";
+
+                    } else if (nome.includes("plane011") || nome.includes("plane017") || nome.includes("plane010") || nome.includes("plane006")) {
+                        tituloPeca.innerText = "Tampas de Válvulas";
+                        descPeca.innerText = "Barreira hermética de contenção. Mantém o sistema dinâmico de válvulas isolado, preservando a pressão do fluido lubrificante e evitando a dissipação de energia sonora.";
+                        
+                    } else if (nome.includes("cube018") || nome.includes("cube005")) {
+                        tituloPeca.innerText = "Bloco do Motor (Configuração em V)";
+                        descPeca.innerText = "Estrutura central maciça. Suporta gradientes térmicos extremos. A sua geometria em 'V' é matematicamente projetada para o balanceamento e cancelamento de forças inerciais destrutivas.";
+
+                    } else if (nome.includes("cylinder016") || nome.includes("cylinder019")) {
+                        tituloPeca.innerText = "Tampa de Óleo / Válvula de Respiro";
+                        descPeca.innerText = "Ponto de entrada do fluido lubrificante. Atua na equalização da pressão interna, aliviando os gases acumulados no cárter durante o ciclo mecânico.";
+
+                    } else if (nome.includes("cylinder042") || nome.includes("cylinder026") || nome.includes("cylinder041")) {
+                        tituloPeca.innerText = "Filtro de Ar Circular (Carburador Único)";
+                        descPeca.innerText = "Filtro com duto direcional. Capta ar externo em menor temperatura para aumentar a densidade do fluido admitido, melhorando a eficiência volumétrica e o rendimento térmico da combustão.";
+
+                    } else {
+                        tituloPeca.innerText = pecaTocada.name;
+                        descPeca.innerText = "Anote o nome acima e coloque no seu IF.";
+                    }
+                    
+                } else {
+                    painelInfo.style.display = 'none';
+                }
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
