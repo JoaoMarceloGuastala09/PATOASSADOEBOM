@@ -79,6 +79,10 @@ window.addEventListener('click', (e) => {
             } else if (nome.includes("plug_low")) {
                 uiTitle.innerText = "Vela de Ignição (Isolador Cerâmico)";
                 uiDesc.innerText = "Isola a alta tensão elétrica necessária para gerar o arco voltaico (faísca), servindo como o gatilho da detonação da mistura comprimida.";
+                
+            } else if (nome.includes("cube008") || nome.includes("cube010")) {
+                uiTitle.innerText = "Alavanca do Acelerador (Braço do eixo da borboleta)";
+                uiDesc.innerText = "A alavanca do acelerador converte o movimento do pedal em rotação do eixo da borboleta, controlando a quantidade de ar e mistura que entra no motor.";
 
             } else if (nome.includes("cylinder014") || nome.includes("cylinder007")){
                 uiTitle.innerText = "Conjunto de Válvula e Mola";
