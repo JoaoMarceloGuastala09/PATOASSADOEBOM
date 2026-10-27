@@ -120,9 +120,6 @@ window.addEventListener('click', (e) => {
                 uiTitle.innerText = "Correia de Transmissão";
                 uiDesc.innerText = "Sistema de transmissão por polias. Utiliza o atrito mecânico e a tensão para transferir a energia cinética rotacional do eixo principal para os componentes auxiliares do motor.";
                 
-            } else if (nome.includes("NOME_DO_ALTERNADOR_AQUI")) {
-                uiTitle.innerText = "Alternador / Componentes Auxiliares";
-                uiDesc.innerText = "Gerador elétrico acionado mecanicamente. Baseado nos princípios do eletromagnetismo, converte a energia mecânica de rotação em energia elétrica para alimentar o sistema de ignição.";
             
             } else if (nome.includes("cube020") || nome.includes("cube003") || nome.includes("cylinder020")) {
                 uiTitle.innerText = "Chapa de Fixação Dos Componentes Da Correia";
